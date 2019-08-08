@@ -17,7 +17,7 @@ chkBld () {
 		let ER++;
 	else
 		echo "Building failed";
-		make -j 1 V=s 2>> build-errors.log 1>> build-output.log
+		make -j 1 V=s >> build.log 2>&1
 		if [  $? -eq 0  ]
 		then
 			echo "Second building attempt succesful";
@@ -36,14 +36,6 @@ clean () {
 	rm -rf files/*
 	chk "Cleaning files"
 }
-cleanLogs () {
-	rm -f build.log
-	chk "Removing build.log"
-	rm -f build-output.log
-	chk "Removing build-output.log"
-	rm -f build-errors.log
-	chk "Removing build-errors.log"
-}
 build () {
 	echo "Building $1"
 	clean
@@ -51,27 +43,28 @@ build () {
 	chk "Copying .config"
 	cp -rf ../openwrt-config/$1/etc files
 	chk "Copying files"
-	make defconfig 2>> build-errors.log 1>> build-output.log
+	make -j 5 defconfig >> build.log 2>&1
 	chk "Expanding .config"
-	make clean 2>> build-errors.log 1>> build-output.log
+	make -j 5 clean >> build.log 2>&1
 	chk "Cleaning"
-	make download 2>> build-errors.log 1>> build-output.log
+	make -j 5 download >> build.log 2>&1
 	chk "Downloading"
-	make -j 1 V=s 2>> build-errors.log 1>> build-output.log
+	make -j 5 >> build.log 2>&1
 	chkBld
 	for file in bin/targets/*/*/openwrt-*-squashfs-*.bin
 	do
-		file2=`basename $file`
-		file2=${file2##*-*-*-*-*-*-*-}
-		mv $file "${file%%openwrt-*-squashfs-*.bin}${1}-${file2}"
+		file2="`basename $file`"
+		file2="${file2#*-*-*-*-*-*-*-}"
+		mv "$file" "../openwrt-firmware/`basename ${file%openwrt-*-squashfs-*.bin}${1}-${file2}`"
 	done
 	chk "Copying results"
-	make clean 2>> build-errors.log 1>> build-output.log
+	make -j 5 clean >> build.log 2>&1
 	chk "Cleaning"
 	clean
-	echo "\n"
+	echo -e '\n'
 }
-cleanLogs
+rm -f build.log
+chk "Removing build.log"
 build "sverdlova-1"
 build "sverdlova-2"
 build "danilevskii-1"
