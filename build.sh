@@ -40,7 +40,7 @@ build () {
 	make -j 5 download >> build.log 2>&1
 	chk
 	echo "Building"
-	make -j 5 >> build.log 2>&1
+	make -j 5 V=s >> build.log 2>&1
 	if [  $? -eq 0  ]
 	then
 		let ER++;
