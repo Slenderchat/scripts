@@ -38,11 +38,11 @@ clean () {
 }
 build () {
 	clean
-	cp -f ../openwrt-config/$1/.config .config
+	cp -f ../openwrt-config/$1/.config .
 	chk "Copying .config"
 	cp -rf ../openwrt-config/$1/etc files
 	chk "Copying files"
-	make difconfig
+	make defconfig
 	chk "Expanding .config"
 	make clean
 	chk "Cleaning"
