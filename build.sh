@@ -83,10 +83,19 @@ chk
 echo "Installing feeds"
 ./scripts/feeds install -a >> build.log 2>&1
 chk
-build "sverdlova-1"
-build "sverdlova-2"
-build "danilevskii-1"
-build "danilevskii-2"
-build "danilevskii-3"
-build "danilevskii-4"
+echo -e "\n"
+if [ $# -gt 0 ]
+then
+	for arg in $*
+	do
+		build "$arg"
+	done
+else
+	build "sverdlova-1"
+	build "sverdlova-2"
+	build "danilevskii-1"
+	build "danilevskii-2"
+	build "danilevskii-3"
+	build "danilevskii-4"
+fi
 
