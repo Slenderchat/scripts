@@ -3,68 +3,86 @@ ER=1
 chk () {
 	if [  $? -eq 0  ]
 	then
-		echo "$1 succesful";
 		let ER++;
 	else
-		echo "$1 failed";
+		echo "Operation unsuccessful: $ER";
 		exit $ER;
 	fi
 }
-chkBld () {
-	if [  $? -eq 0  ]
-	then
-		echo "Building succesful";
-		let ER++;
-	else
-		echo "Building failed";
-		make -j 1 V=s >> build.log 2>&1
-		if [  $? -eq 0  ]
-		then
-			echo "Second building attempt succesful";
-			let ER++;
-		else
-			echo "Second building attempt failed";
-			exit $ER;
-		fi
-	fi
-}
 clean () {
+	echo "Cleaning"
+	echo "Cleaning configuration"
 	rm -f .config
-	chk "Cleaning .config"
+	chk
+	echo "Cleaning old configuration"
 	rm -f .config.old
-	chk "Cleaning .config.old"
+	chk 
+	echo "Cleaning files"
 	rm -rf files/*
-	chk "Cleaning files"
+	chk
 }
 build () {
 	echo "Building $1"
 	clean
+	echo "Copying configuration"
 	cp -f ../openwrt-config/$1/.config .
-	chk "Copying .config"
+	chk
+	echo "Copying files"
 	cp -rf ../openwrt-config/$1/etc files
-	chk "Copying files"
+	chk
+	echo "Expanding configuration"
 	make -j 5 defconfig >> build.log 2>&1
-	chk "Expanding .config"
+	chk
+	echo "Pre-build cleaning"
 	make -j 5 clean >> build.log 2>&1
-	chk "Cleaning"
+	chk
+	echo "Pre-build downloading"
 	make -j 5 download >> build.log 2>&1
-	chk "Downloading"
+	chk
+	echo "Building"
 	make -j 5 >> build.log 2>&1
-	chkBld
+	if [  $? -eq 0  ]
+	then
+		let ER++;
+	else
+		echo -e "Building attempt failed\nRetrying with one thread and debug output";
+		make -j 1 V=s >> build.log 2>&1
+		if [  $? -eq 0  ]
+		then
+			let ER++;
+		else
+			echo "Second building attempt unsuccessful: $ER";
+			exit $ER;
+		fi
+	fi
+	echo "Copying results"
 	for file in bin/targets/*/*/openwrt-*-squashfs-*.bin
 	do
 		file2="`basename $file`"
 		file2="${file2#*-*-*-*-*-*-*-}"
 		mv "$file" "../openwrt-firmware/`basename ${file%openwrt-*-squashfs-*.bin}${1}-${file2}`"
 	done
-	chk "Copying results"
+	echo "Post-build cleaning"
 	make -j 5 clean >> build.log 2>&1
-	chk "Cleaning"
+	chk
 	clean
 	echo -e '\n'
 }
+echo "Removing build log"
 rm -f build.log
-chk "Removing build.log"
+chk
+echo "Updating from GIT"
+git pull >> build.log 2>&1
+chk
+echo "Checking out from GIT"
+git checkout -f >> build.log 2>&1
+chk
+echo "Updating feeds"
+./scripts/feeds update -a >> build.log 2>&1
+chk
+echo "Installing feeds"
+./scripts/feeds install -a >> build.log 2>&1
+chk
 build "sverdlova-1"
 build "sverdlova-2"
 build "danilevskii-1"
