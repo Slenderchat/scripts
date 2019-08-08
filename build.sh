@@ -17,7 +17,7 @@ chkBld () {
 		let ER++;
 	else
 		echo "Building failed";
-		make -j 1
+		make -j 1 V=s
 		if [  $? -eq 0  ]
 		then
 			echo "Second building attempt succesful";
@@ -48,7 +48,7 @@ build () {
 	chk "Cleaning"
 	make download
 	chk "Downloading"
-	make -j 1
+	make -j 1 V=s
 	chkBld
 	for file in bin/targets/*/*/openwrt-*-squashfs-*.bin
 	do
