@@ -3,10 +3,10 @@ ER=1
 chk () {
 	if [  $? -eq 0  ]
 	then
-		let ER++;
+		let ER++
 	else
-		echo "Operation unsuccessful: $ER";
-		exit $ER;
+		echo "Operation unsuccessful: $ER"
+		exit $ER
 	fi
 }
 clean () {
@@ -43,16 +43,19 @@ build () {
 	make -j 5 V=s >> build.log 2>&1
 	if [  $? -eq 0  ]
 	then
-		let ER++;
+		let ER++
 	else
-		echo -e "Building attempt failed\nRetrying with one thread and debug output";
+		echo -e "Building attempt failed\nRetrying with one thread and debug output"
+		echo -e '\n' >> build.log
+		echo -e "Building attempt failed\nRetrying with one thread and debug output" >> build.log
+		echo -e '\n' >> build.log
 		make -j 1 V=s >> build.log 2>&1
 		if [  $? -eq 0  ]
 		then
-			let ER++;
+			let ER++
 		else
-			echo "Second building attempt unsuccessful: $ER";
-			exit $ER;
+			echo "Second building attempt unsuccessful: $ER"
+			exit $ER
 		fi
 	fi
 	echo "Copying results"
