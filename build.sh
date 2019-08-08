@@ -31,6 +31,8 @@ chkBld () {
 clean () {
 	rm -f .config
 	chk "Cleaning .config"
+	rm -f .config.old
+	chk "Cleaning .config.old"
 	rm -rf files/*
 	chk "Cleaning files"
 }
@@ -40,6 +42,8 @@ build () {
 	chk "Copying .config"
 	cp -rf ../openwrt-config/$1/etc files
 	chk "Copying files"
+	make difconfig
+	chk "Expanding .config"
 	make clean
 	chk "Cleaning"
 	make download
