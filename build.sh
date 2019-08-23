@@ -75,10 +75,10 @@ echo "Removing build log"
 rm -f build.log
 chk
 echo "Updating from GIT"
-git pull >> build.log 2>&1
+git fetch >> build.log 2>&1
 chk
 echo "Checking out from GIT"
-git checkout -f >> build.log 2>&1
+git reset --hard origin/master >> build.log 2>&1
 chk
 echo "Updating feeds"
 ./scripts/feeds update -a >> build.log 2>&1
