@@ -1,15 +1,15 @@
 #!/bin/bash
-mkdir buffer
-for file in input/*.mp4
+TF=$(mktemp)
+TD=$(mktemp -d)
+for file in *.mp4
 do
-	ffmpeg -i $file -an -c:v libx264 -pix_fmt yuv420p -profile:v baseline -crf 18 -r 10 -video_track_timescale 10 -y "buffer/$(basename $file)"
+	ffmpeg -i $file -an -c:v libx264 -pix_fmt yuv420p -profile:v baseline -level 31 -crf 23 -r 10 -video_track_timescale 10 -y "$TD/$(basename $file)"
 done
-> list
-for file in buffer/*.mp4
+for file in $TD/*.mp4
 do
-        echo "file '$file'" >> list
+	echo "file '$file'" >> $TF
 done
-ffmpeg -f concat -safe 0 -i list -c:v copy -an -y "out.mp4"
-rm -f list
-rm -rf buffer
+ffmpeg -f concat -safe 0 -i $TF -c:v copy -an -y out.mp4
+rm -rf $TF
+rm -rf $TD
 
