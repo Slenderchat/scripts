@@ -65,6 +65,9 @@ echo "Creating symlink to 'build_dir'" &&
 ln -sf /tmp/build_dir build_dir &&
 echo "Creating 'files'" &&
 mkdir -p ~/openwrt/files &&
+echo "Cleaning and creating 'openwrt-firmware'" &&
+rm -rf ~/openwrt-firmware &&
+mkdir -p ~/openwrt-firmware &&
 echo
 if [ $# -gt 0 ]
 then
