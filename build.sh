@@ -3,11 +3,11 @@ clean () {
 	echo "Cleaning configuration" &&
 	rm -f ~/openwrt/.config ~/openwrt/.config.old &&
 	echo "Cleaning files" &&
-	rm -rf ~/openwrt/files/* &&
+	rm -rf ~/openwrt/files &&
 	echo "Cleaning bin" &&
-	rm -rf ~/openwrt/bin/* &&
+	rm -rf ~/openwrt/bin &&
 	echo "Cleaning build_dir" &&
-	rm -rf ~/openwrt/build_dir/*
+	rm -rf ~/openwrt/build_dir
 }
 build () {
 	echo "Building $1" &&
