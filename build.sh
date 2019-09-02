@@ -1,12 +1,8 @@
 #!/bin/bash
-clean () {
-	echo "Cleaning" &&
-	rm -rf ~/openwrt/.config ~/openwrt/.config.old ~/openwrt/files/* ~/openwrt/bin/* ~/openwrt/build_dir/* ~/openwrt/tmp/*
-}
 build () {
 	echo "Building $1" &&
 	echo "Pre-build cleaning" &&
-	clean &&
+	rm -rf ~/openwrt/.config ~/openwrt/.config.old ~/openwrt/files/* ~/openwrt/bin/* ~/openwrt/build_dir/* ~/openwrt/tmp/*
 	echo "Copying configuration" &&
 	cp -f ~/openwrt-config/$1/.config ~/openwrt/.config &&
 	echo "Copying files" &&
@@ -34,8 +30,6 @@ build () {
 		tmp=${file2#*-*-*-*-*-*-*-} &&
 		mv $file ~/openwrt-firmware/$(basename ${file%openwrt-*-squashfs-*.bin}$1-$tmp)
 	done
-	echo "Post-build cleaning" &&
-	clean &&
 	echo
 }
 echo "Removing build log" &&
