@@ -1,35 +1,25 @@
 #!/bin/bash
 clean () {
-	echo "Cleaning configuration" &&
-	rm -f ~/openwrt/.config ~/openwrt/.config.old &&
-	echo "Cleaning files" &&
-	rm -rf ~/openwrt/files/* &&
-	echo "Cleaning bin" &&
-	rm -rf ~/openwrt/bin &&
-	echo "Cleaning build_dir" &&
-	rm -rf ~/openwrt/build_dir/*
+	echo "Cleaning" &&
+	rm -rf ~/openwrt/.config ~/openwrt/.config.old ~/openwrt/files/* ~/openwrt/bin/* ~/openwrt/build_dir/* ~/openwrt/tmp/*
 }
 build () {
 	echo "Building $1" &&
+	echo "Pre-build cleaning" &&
 	clean &&
 	echo "Copying configuration" &&
-	cp -f ~/openwrt-config/$1/.config . &&
+	cp -f ~/openwrt-config/$1/.config ~/openwrt/.config &&
 	echo "Copying files" &&
-	cp -rf ~/openwrt-config/$1/etc files &&
+	cp -rf ~/openwrt-config/$1/etc ~/openwrt/files &&
 	echo "Expanding configuration" &&
-	make defconfig >> build.log 2>&1 &&
-	echo "Pre-build cleaning" &&
-	make clean >> build.log 2>&1 &&
-	echo "Pre-build downloading" &&
-	make download >> build.log 2>&1 &&
+	make -j -l 4.0 defconfig >> build.log 2>&1 &&
+	echo "Downloading" &&
+	make -j -l 4.0 download >> build.log 2>&1 &&
 	echo "Building" &&
-	make FORCE_UNSAFE_CONFIGURE=1 -j 4 >> build.log 2>&1
+	make FORCE_UNSAFE_CONFIGURE=1 -j -l 4.0 >> build.log 2>&1
 	if [  $? -ne 0  ]
 	then
-		echo -e "Building attempt failed\nRetrying with one thread" &&
-		echo >> build.log &&
-		echo -e "Building attempt failed\nRetrying with one thread" >> build.log &&
-		echo >> build.log &&
+		echo -e "Building attempt failed\nRetrying with one thread" | tee -a build.log &&
 		make FORCE_UNSAFE_CONFIGURE=1 V=s >> build.log 2>&1
 		if [  $? -ne 0  ]
 		then
@@ -40,12 +30,11 @@ build () {
 	echo "Copying results" &&
 	for file in ~/openwrt/bin/targets/*/*/openwrt-*-squashfs-*.bin
 	do
-		file2=$(basename $file) &&
-		file2=${file2#*-*-*-*-*-*-*-} &&
-		mv $file ~/openwrt-firmware/$(basename ${file%openwrt-*-squashfs-*.bin}$1-$file2)
+		local tmp=$(basename $file) &&
+		tmp=${file2#*-*-*-*-*-*-*-} &&
+		mv $file ~/openwrt-firmware/$(basename ${file%openwrt-*-squashfs-*.bin}$1-$tmp)
 	done
 	echo "Post-build cleaning" &&
-	make clean >> build.log 2>&1 &&
 	clean &&
 	echo
 }
@@ -56,9 +45,9 @@ git fetch >> build.log 2>&1 &&
 echo "Reseting working tree to origin/master's state" &&
 git reset --hard origin/master >> build.log 2>&1 &&
 echo "Updating feeds" &&
-./scripts/feeds update -a >> build.log 2>&1 &&
+~/openwrt/scripts/feeds update -a >> build.log 2>&1 &&
 echo "Installing feeds" &&
-./scripts/feeds install -a >> build.log 2>&1 &&
+~/openwrt/scripts/feeds install -a >> build.log 2>&1 &&
 echo "Creating 'build_dir'" &&
 mkdir -p /tmp/build_dir &&
 echo "Creating symlink to 'build_dir'" &&
@@ -76,10 +65,11 @@ then
 		build $arg
 	done
 else
-	for tgt in ~/openwrt-config/*-[0-9]
+	for tgt in ~/openwrt-config/*-[1-9]
 	do
 		build $(basename $tgt)
 	done
 fi
+echo "Nuking junk files and folders"
 rm -rf ~/openwrt/bin ~/openwrt/build_dir ~/openwrt/files ~/openwrt/tmp
 
