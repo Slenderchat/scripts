@@ -65,5 +65,5 @@ else
 	done
 fi
 echo "Nuking junk files and folders"
-rm -rf ~/openwrt/bin ~/openwrt/build_dir ~/openwrt/files ~/openwrt/tmp
+rm -rf ~/openwrt/bin ~/openwrt/build_dir ~/openwrt/files ~/openwrt/tmp /tmp/build_dir
 
