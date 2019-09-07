@@ -12,11 +12,11 @@ build () {
 	echo "Downloading" &&
 	make -j -l 4.0 download >> build.log 2>&1 &&
 	echo "Building" &&
-	make FORCE_UNSAFE_CONFIGURE=1 -j -l 4.0 >> build.log 2>&1
+	make -j -l 4.0 >> build.log 2>&1
 	if [  $? -ne 0  ]
 	then
 		echo -e "Building attempt failed\nRetrying with one thread" | tee -a build.log &&
-		make FORCE_UNSAFE_CONFIGURE=1 V=s >> build.log 2>&1
+		make V=s >> build.log 2>&1
 		if [  $? -ne 0  ]
 		then
 			echo "Second building attempt unsuccessful" &&
