@@ -4,7 +4,7 @@ build () {
 	echo "Pre-build cleaning" &&
 	rm -rf ~/openwrt/.config ~/openwrt/.config.old ~/openwrt/files/* ~/openwrt/bin/* ~/openwrt/build_dir/* ~/openwrt/tmp/*
 	echo "Copying configuration" &&
-	cp -f ~/openwrt-config/$1/.config ~/openwrt/.config &&
+	cp -f ~/openwrt-config/$1/config ~/openwrt/.config &&
 	echo "Copying files" &&
 	cp -rf ~/openwrt-config/$1/etc ~/openwrt/files &&
 	echo "Expanding configuration" &&
