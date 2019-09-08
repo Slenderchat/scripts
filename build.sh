@@ -6,7 +6,7 @@ build () {
 	echo "Copying configuration" &&
 	cp -f ~/openwrt-config/$1/config ~/openwrt/.config &&
 	echo "Copying files" &&
-	cp -rf ~/openwrt-config/$1/etc ~/openwrt/files &&
+	cp -Lrf ~/openwrt-config/$1/etc ~/openwrt/files &&
 	echo "Expanding configuration" &&
 	make -j -l 4.0 defconfig >> build.log 2>&1 &&
 	echo "Downloading" &&
