@@ -2,17 +2,17 @@
 build () {
 	echo "Building $1" &&
 	echo "Pre-build cleaning" &&
-	rm -rf ~/openwrt/.config ~/openwrt/.config.old ~/openwrt/files/* ~/openwrt/bin/* ~/openwrt/build_dir/* ~/openwrt/tmp/*
+	rm -rf $HOME/openwrt/.config $HOME/openwrt/.config.old $HOME/openwrt/files/* $HOME/openwrt/bin/* $HOME/openwrt/build_dir/* $HOME/openwrt/tmp/*
 	echo "Copying configuration" &&
-	cp -f ~/openwrt-config/$1/config ~/openwrt/.config &&
+	cp -f $HOME/openwrt-config/$1/config $HOME/openwrt/.config &&
 	echo "Copying files" &&
-	cp -Lrf ~/openwrt-config/$1/etc ~/openwrt/files &&
+	cp -Lrf $HOME/openwrt-config/$1/etc $HOME/openwrt/files &&
 	echo "Expanding configuration" &&
-	make -j -l 4.0 defconfig >> build.log 2>&1 &&
+	make -j 2 defconfig >> build.log 2>&1 &&
 	echo "Downloading" &&
-	make -j -l 4.0 download >> build.log 2>&1 &&
+	make -j 2 download >> build.log 2>&1 &&
 	echo "Building" &&
-	make -j -l 4.0 >> build.log 2>&1
+	make -j 2 >> build.log 2>&1
 	if [  $? -ne 0  ]
 	then
 		echo -e "Building attempt failed\nRetrying with one thread" | tee -a build.log &&
@@ -24,11 +24,11 @@ build () {
 		fi
 	fi
 	echo "Copying results" &&
-	for file in ~/openwrt/bin/targets/*/*/openwrt-*-squashfs-*.bin
+	for file in $HOME/openwrt/bin/targets/*/*/openwrt-*-squashfs-*.bin
 	do
 		local tmp=$(basename $file) &&
 		tmp=${file2#*-*-*-*-*-*-*-} &&
-		mv $file ~/openwrt-firmware/$(basename ${file%openwrt-*-squashfs-*.bin}$1-$tmp)
+		mv $file $HOME/openwrt-firmware/$(basename ${file%openwrt-*-squashfs-*.bin}$1-$tmp)
 	done
 	echo
 }
@@ -39,18 +39,18 @@ git fetch >> build.log 2>&1 &&
 echo "Reseting working tree to origin/master's state" &&
 git reset --hard origin/master >> build.log 2>&1 &&
 echo "Updating feeds" &&
-~/openwrt/scripts/feeds update -a >> build.log 2>&1 &&
+$HOME/openwrt/scripts/feeds update -a >> build.log 2>&1 &&
 echo "Installing feeds" &&
-~/openwrt/scripts/feeds install -a >> build.log 2>&1 &&
+$HOME/openwrt/scripts/feeds install -a >> build.log 2>&1 &&
 echo "Creating 'build_dir'" &&
 mkdir -p /tmp/build_dir &&
 echo "Creating symlink to 'build_dir'" &&
 ln -sf /tmp/build_dir build_dir &&
 echo "Creating 'files'" &&
-mkdir -p ~/openwrt/files &&
+mkdir -p $HOME/openwrt/files &&
 echo "Cleaning and creating 'openwrt-firmware'" &&
-rm -rf ~/openwrt-firmware &&
-mkdir -p ~/openwrt-firmware &&
+rm -rf $HOME/openwrt-firmware &&
+mkdir -p $HOME/openwrt-firmware &&
 echo
 if [ $# -gt 0 ]
 then
@@ -59,11 +59,11 @@ then
 		build $arg
 	done
 else
-	for tgt in ~/openwrt-config/*-[1-9]
+	for tgt in $HOME/openwrt-config/*-[1-9]
 	do
 		build $(basename $tgt)
 	done
 fi
 echo "Nuking junk files and folders"
-rm -rf ~/openwrt/bin ~/openwrt/build_dir ~/openwrt/files ~/openwrt/tmp /tmp/build_dir
+rm -rf $HOME/openwrt/bin $HOME/openwrt/build_dir $HOME/openwrt/files $HOME/openwrt/tmp /tmp/build_dir
 
