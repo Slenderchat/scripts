@@ -1,16 +1,20 @@
 #!/bin/bash
+clean () {
+	git clean -ffdx -e build.sh -e staging_dir >> build.log 2>&1
+}
 build () {
 	echo "Building $1" &&
 	echo "Pre-build cleaning" &&
-	rm -rf .config .config.old files/* bin/* build_dir/* tmp/*
+	rm -rf .config .config.old files bin build_dir &&
 	echo "Copying configuration" &&
 	cp -f ../openwrt-config/$1/config .config &&
 	echo "Copying files" &&
+i	mkdir -p files &&
 	cp -Lrf ../openwrt-config/$1/etc files &&
 	echo "Expanding configuration" &&
 	make defconfig >> build.log 2>&1 &&
 	echo "Downloading" &&
-	make -j 4 download >> build.log 2>&1 &&
+	make -j -l 4.0 download >> build.log 2>&1 &&
 	echo "Building" &&
 	make -j 4 >> build.log 2>&1
 	if [  $? -ne 0  ]
@@ -24,7 +28,8 @@ build () {
 		fi
 	fi
 	echo "Copying results" &&
-	for firmware in bin/targets/**/**/*.bin
+	mkdir -p ../openwrt-firmware
+	for firmware in bin/targets/**/**/*squashfs*.bin
 	do
 		tmp=$(basename $firmware) &&
 		tmp=$(echo -n $tmp | perl -ne 's/.*?-(?=tftp-|sysupgrade|factory)//g; print;') &&
@@ -33,22 +38,13 @@ build () {
 	done
 	echo
 }
-echo "Fetching from GIT" &&
+echo "Cleaning and updating openwrt from GIT" &&
 git fetch >> build.log 2>&1 &&
-echo "Reseting working tree to origin/master's state" &&
 git reset --hard origin/master >> build.log 2>&1 &&
-echo "Cleaning working tree" &&
-git clean -ffdx -e build.sh -e staging_dir >> build.log 2>&1 &&
-echo "Updating feeds" &&
+clean
+echo "Updating and installing feeds" &&
 scripts/feeds update -a >> build.log 2>&1 &&
-echo "Installing feeds" &&
 scripts/feeds install -a >> build.log 2>&1 &&
-#echo "Creating 'build_dir'" &&
-#mkdir -p /tmp/build_dir &&
-#ln -sf /tmp/build_dir build_dir &&
-echo "Creating directories" &&
-mkdir -p files &&
-mkdir -p ../openwrt-firmware &&
 echo
 if [ $# -gt 0 ]
 then
@@ -57,11 +53,10 @@ then
 		build $arg
 	done
 else
-	for tgt in ../openwrt-config/*-[1-4]
+	for tgt in ../openwrt-config/*-[0-9]
 	do
 		build $(basename $tgt)
 	done
 fi
 echo "Cleaning working tree"
-git clean -ffdx -e build.sh -e staging_dir >> build.log 2>&1
-
+clean
