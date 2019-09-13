@@ -9,7 +9,7 @@ build () {
 	echo "Copying configuration" &&
 	cp -f ../openwrt-config/$1/config .config &&
 	echo "Copying files" &&
-i	mkdir -p files &&
+	mkdir -p files &&
 	cp -Lrf ../openwrt-config/$1/etc files &&
 	echo "Expanding configuration" &&
 	make defconfig >> build.log 2>&1 &&
