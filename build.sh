@@ -14,9 +14,9 @@ build () {
 	echo "Expanding configuration" &&
 	make defconfig >> build.log 2>&1 &&
 	echo "Downloading" &&
-	make -j 4 -l 4.0 download >> build.log 2>&1 &&
+	make -j download >> build.log 2>&1 &&
 	echo "Building" &&
-	make -j 4 -l 4.0 >> build.log 2>&1
+	make -j 4 >> build.log 2>&1
 	if [  $? -ne 0  ]
 	then
 		echo -e "Building attempt failed\nRetrying with one thread" | tee -a build.log &&
@@ -60,3 +60,4 @@ else
 fi
 echo "Cleaning working tree"
 clean
+
