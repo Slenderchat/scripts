@@ -11,6 +11,7 @@ build () {
 	echo "Copying files" &&
 	mkdir -p files &&
 	cp -Lrf ../openwrt-config/$1/etc files &&
+	cp -rf ../openwrt-config/$1/root files &&
 	echo "Expanding configuration" &&
 	make defconfig >> build.log 2>&1 &&
 	echo "Downloading" &&
