@@ -12,10 +12,12 @@ build () {
 	mkdir -p files &&
 	cp -Lrf ../openwrt-config/$1/etc files &&
 	cp -rf ../openwrt-config/$1/root files &&
+	rm -f files/root/.ssh/known_hosts &&
+	cp -Lf ../openwrt-config/$1/root/.ssh/known_hosts files/root/.ssh/known_hosts &&
 	echo "Expanding configuration" &&
 	make defconfig >> build.log 2>&1 &&
 	echo "Downloading" &&
-	make -j download >> build.log 2>&1 &&
+	make -j 4 download >> build.log 2>&1 &&
 	echo "Building" &&
 	make -j 4 >> build.log 2>&1
 	if [  $? -ne 0  ]
