@@ -12,4 +12,3 @@ getInfo Danilevskii-2 192.168.1.2
 getInfo Danilevskii-3 192.168.1.3
 getInfo Danilevskii-4 192.168.1.4
 getInfo Spb-1 192.168.2.1
-

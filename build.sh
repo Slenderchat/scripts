@@ -63,4 +63,3 @@ else
 fi
 echo "Cleaning working tree"
 clean
-
