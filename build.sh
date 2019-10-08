@@ -4,18 +4,18 @@ clean () {
 }
 build () {
 	echo "Building $1" &&
-	echo "Pre-build cleaning" &&
-	rm -rf .config .config.old files bin build_dir &&
 	echo "Copying configuration" &&
 	cp -f ../openwrt-config/$1/config .config &&
+	echo "Expanding configuration" &&
+	make defconfig >> build.log 2>&1 &&
+	echo "Pre-build cleaning" &&
+	make clean >> build.log 2>&1 &&
 	echo "Copying files" &&
 	mkdir -p files &&
 	cp -Lrf ../openwrt-config/$1/etc files &&
 	cp -rf ../openwrt-config/$1/root files &&
 	rm -f files/root/.ssh/known_hosts &&
 	cp -Lf ../openwrt-config/$1/root/.ssh/known_hosts files/root/.ssh/known_hosts &&
-	echo "Expanding configuration" &&
-	make defconfig >> build.log 2>&1 &&
 	echo "Downloading" &&
 	make -j 4 download >> build.log 2>&1 &&
 	echo "Building" &&
@@ -31,7 +31,7 @@ build () {
 		fi
 	fi
 	echo "Copying results" &&
-	mkdir -p ../openwrt-firmware
+	mkdir -p ../openwrt-firmware &&
 	for firmware in bin/targets/**/**/*squashfs*.bin
 	do
 		tmp=$(basename $firmware) &&
@@ -44,11 +44,11 @@ build () {
 echo "Cleaning and updating openwrt from GIT" &&
 git fetch >> build.log 2>&1 &&
 git reset --hard origin/master >> build.log 2>&1 &&
-clean
+clean &&
 echo "Updating and installing feeds" &&
 scripts/feeds update -a >> build.log 2>&1 &&
 scripts/feeds install -a >> build.log 2>&1 &&
-echo
+echo &&
 if [ $# -gt 0 ]
 then
 	for arg in $*
@@ -61,5 +61,5 @@ else
 		build $(basename $tgt)
 	done
 fi
-echo "Cleaning working tree"
+echo "Cleaning working tree" &&
 clean
