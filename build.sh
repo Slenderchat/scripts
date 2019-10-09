@@ -10,6 +10,7 @@ build () {
 	make defconfig >> build.log 2>&1 &&
 	echo "Pre-build cleaning" &&
 	make clean >> build.log 2>&1 &&
+	rm -rf files/
 	echo "Copying files" &&
 	mkdir -p files &&
 	cp -Lrf ../openwrt-config/$1/etc files &&
