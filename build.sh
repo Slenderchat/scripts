@@ -1,6 +1,6 @@
 #!/bin/bash
 clean () {
-	git clean -ffdx -e build.sh -e staging_dir >> build.log 2>&1
+	git clean -ffdx -e build.sh >> build.log 2>&1
 }
 build () {
 	echo "Building $1" &&
