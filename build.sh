@@ -1,11 +1,8 @@
 #!/bin/bash
-clean () {
-	git clean -ffdx -e build.sh -e staging_dir >> build.log 2>&1
-}
 build () {
 	echo "Building $1" &&
 	echo "Copying configuration" &&
-	cp -f ../openwrt-config/$1/config .config &&
+	cp ../openwrt-config/$1/config .config &&
 	echo "Expanding configuration" &&
 	make defconfig >> build.log 2>&1 &&
 	echo "Pre-build cleaning" &&
@@ -13,10 +10,7 @@ build () {
 	rm -rf files/
 	echo "Copying files" &&
 	mkdir -p files &&
-	cp -Lrf ../openwrt-config/$1/etc files &&
-	cp -rf ../openwrt-config/$1/root files &&
-	rm -f files/root/.ssh/known_hosts &&
-	cp -Lf ../openwrt-config/$1/root/.ssh/known_hosts files/root/.ssh/known_hosts &&
+	cp -Lr ../openwrt-config/$1/etc files &&
 	echo "Downloading" &&
 	make -j 4 download >> build.log 2>&1 &&
 	echo "Building" &&
@@ -43,13 +37,9 @@ build () {
 	echo
 }
 echo "Cleaning and updating openwrt from GIT" &&
-git fetch >> build.log 2>&1 &&
-git reset --hard origin/master >> build.log 2>&1 &&
-clean &&
-echo "Updating and installing feeds" &&
-scripts/feeds update -a >> build.log 2>&1 &&
-scripts/feeds install -a >> build.log 2>&1 &&
-echo &&
+git reset --hard >> build.log 2>&1 &&
+git clean -fdx -e build.sh -e feeds -e staging_dir >> build.log 2>&1 &&
+echo
 if [ $# -gt 0 ]
 then
 	for arg in $*
@@ -63,4 +53,4 @@ else
 	done
 fi
 echo "Cleaning working tree" &&
-clean
+git clean -fdx -e build.sh -e feeds -e staging_dir >> build.log 2>&1
