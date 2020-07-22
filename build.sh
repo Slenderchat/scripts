@@ -8,17 +8,19 @@ build () {
 	echo "Pre-build cleaning" &&
 	make clean >> build.log 2>&1 &&
 	rm -rf files/
+	echo "Checking build requirements" &&
+	make prereq >> build.log 2>&1 &&
 	echo "Copying files" &&
 	mkdir -p files &&
 	cp -Lr ../openwrt-config/$1/etc files &&
 	echo "Downloading" &&
-	make -j 4 download >> build.log 2>&1 &&
+	make -j4 download >> build.log 2>&1 &&
 	echo "Building" &&
-	make -j 4 >> build.log 2>&1
+	make -j4 >> build.log 2>&1
 	if [  $? -ne 0  ]
 	then
-		echo -e "Building attempt failed\nRetrying with one thread" | tee -a build.log &&
-		make V=s >> build.log 2>&1
+		echo -e "Building attempt failed\nRetrying with debug info" | tee -a build.log &&
+		make -j1 V=s >> build.log 2>&1
 		if [  $? -ne 0  ]
 		then
 			echo "Second building attempt unsuccessful" &&
@@ -37,8 +39,12 @@ build () {
 	echo
 }
 echo "Cleaning and updating openwrt from GIT" &&
+rm -f build.log
+git pull
+scripts/feeds update -a
+scripts/feeds install -a
 git reset --hard >> build.log 2>&1 &&
-git clean -fdx -e build.sh -e feeds -e staging_dir >> build.log 2>&1 &&
+git clean -ffdx -e build_dir -e build.log -e build.sh -e feeds/ -e dl/ -e staging_dir/ >> build.log 2>&1 &&
 echo
 if [ $# -gt 0 ]
 then
@@ -47,10 +53,10 @@ then
 		build $arg
 	done
 else
-	for tgt in ../openwrt-config/*-[0-9]
+	for tgt in ../openwrt-config/*-*
 	do
 		build $(basename $tgt)
 	done
 fi
 echo "Cleaning working tree" &&
-git clean -fdx -e build.sh -e feeds -e staging_dir >> build.log 2>&1
+git clean -ffdx -e build.log -e build.sh -e feeds/ -e dl/ -e staging_dir/ >> build.log 2>&1
